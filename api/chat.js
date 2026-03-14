@@ -4,35 +4,39 @@ if (req.method !== "POST") {
 return res.status(405).json({ error: "Method not allowed" })
 }
 
-try {
-
 const { message } = req.body
 
-const response = await fetch("https://api.openai.com/v1/chat/completions",{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-"Authorization":`Bearer ${process.env.OPENAI_API_KEY}`
+try {
+
+const response = await fetch(
+"https://api-inference.huggingface.co/models/google/flan-t5-large",
+{
+method: "POST",
+headers: {
+"Content-Type": "application/json"
 },
-body:JSON.stringify({
-model:"gpt-4o-mini",
-messages:[
-{role:"system",content:"You are Siggy, the mascot AI of Ritual network. Explain Ritual simply."},
-{role:"user",content:message}
-]
+body: JSON.stringify({
+inputs: message
 })
-})
+}
+)
 
 const data = await response.json()
 
+let reply = "AI reply failed"
+
+if (Array.isArray(data) && data[0]?.generated_text) {
+reply = data[0].generated_text
+}
+
 res.status(200).json({
-reply:data?.choices?.[0]?.message?.content || "AI reply failed"
+reply: reply
 })
 
-} catch(error){
+} catch (error) {
 
 res.status(500).json({
-reply:"Server error"
+reply: "Server error"
 })
 
 }
