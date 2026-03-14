@@ -1,6 +1,10 @@
-export default async function handler(req,res){
+export default async function handler(req, res) {
 
-const message=req.body.message
+if(req.method !== "POST"){
+return res.status(405).json({error:"Method not allowed"})
+}
+
+const {message} = req.body
 
 const response = await fetch(
 "https://api.openai.com/v1/chat/completions",
@@ -13,7 +17,7 @@ headers:{
 body:JSON.stringify({
 model:"gpt-4o-mini",
 messages:[
-{role:"system",content:"You are Siggy, the mascot AI of Ritual. Explain Ritual simply."},
+{role:"system",content:"You are Siggy, Ritual Network AI mascot. Explain Ritual simply."},
 {role:"user",content:message}
 ]
 })
@@ -22,7 +26,7 @@ messages:[
 const data = await response.json()
 
 res.status(200).json({
-reply:data.choices[0].message.content
+reply:data.choices?.[0]?.message?.content || "No reply"
 })
 
 }
